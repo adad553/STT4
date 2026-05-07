@@ -1,0 +1,92 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>자막 입력기 (PC)</title>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+  <style>
+    body { font-family: sans-serif; text-align: center; padding: 40px; }
+    textarea {
+      width: 80%; height: 100px; font-size: 20px;
+      padding: 10px; margin-bottom: 20px; border-radius: 8px;
+    }
+    button {
+      font-size: 20px; padding: 10px 20px; margin: 5px;
+      border: none; border-radius: 8px;
+      background-color: #007BFF; color: white;
+      cursor: pointer;
+    }
+    button:hover { background-color: #0056b3; }
+    #subtitlePreview {
+      font-size: 24px;
+      color: #444;
+      margin-top: 10px;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+<body>
+  <h2>💬 자막 입력 (PC)</h2>
+
+  <textarea id="textInput" placeholder="자막을 입력하세요..."></textarea><br>
+  <button onclick="sendText()">전송</button>
+
+  <hr>
+
+  <h3>📌 단축 문구 전송</h3>
+  <button onclick="sendPreset('비밀번호를 눌러주세요')">1.비밀번호 안내</button>
+  <button onclick="sendPreset('만기 해지 후 이자는 드릴까요?')">2.만기해지안내</button>
+  <button onclick="sendPreset('성명에 성함 적어주세요')">3.서명 요청</button>
+  <button onclick="sendPreset('통장,도장,신분증 주세요')">4.통장 등 요청</button>
+  <button onclick="sendPreset('보이스피싱 전화 받으신거 아니시죠?')">5.보이스피싱 확인</button>
+  <button onclick="sendPreset('전액 다 찾아드릴까요?\n현금으로 드릴까요?\n수표로 드릴까요?\n송금해드릴까요?')">6. 송금 안내</button>
+  
+  <hr>
+
+  <h3>📺 현재 자막</h3>
+  <div id="subtitlePreview">⏳ 자막을 기다리는 중...</div>
+
+  <script>
+    const PC_ID = "pc4"; 
+    
+    const firebaseConfig = {
+      apiKey: "AIzaSyCSBfeKk5H9S_Zf23vwkWrcusvku-e3934",
+      authDomain: "stt-test-32da8.firebaseapp.com",
+      databaseURL: "https://stt-test-32da8-default-rtdb.firebaseio.com",
+      projectId: "stt-test-32da8",
+      storageBucket: "stt-test-32da8.appspot.com",
+      messagingSenderId: "746527873351",
+      appId: "1:746527873351:web:c21b79f9e4ce5b122b1462",
+      measurementId: "G-HQ2BPTTJ1N"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    function sendText() {
+      const text = document.getElementById("textInput").value;
+      db.ref(`subtitle/${PC_ID}`).set(text);
+      document.getElementById("textInput").value = "";
+    }
+
+    function sendPreset(message) {
+      const fixed = message.replace(/\\n/g, "\n");
+      db.ref(`subtitle/${PC_ID}`).set(fixed);
+    }
+
+    db.ref(`subtitle/${PC_ID}`).on("value", function(snapshot) {
+      const val = snapshot.val();
+      document.getElementById("subtitlePreview").innerHTML = val ? val.replace(/\n/g, "<br>") : "⏳ 자막을 기다리는 중...";
+    });
+
+    document.getElementById("textInput").addEventListener("keydown", function(event) {
+      if (event.key === "Enter" && !event.shiftKey) {
+        event.preventDefault();
+        sendText();
+      }
+    });
+  </script>
+</body>
+</html>
